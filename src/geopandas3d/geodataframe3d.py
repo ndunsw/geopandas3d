@@ -409,24 +409,27 @@ class GeoDataFrame3D(GeoDataFrame):
         return bounds_list
 
     # ----- 3D spatial indexing -----
-    def build_sindex(self, method="cKDTree", **kwargs):
+    def build_sindex(self, method: str = "cKDTree", **kwargs):
         """Build 3D spatial index for efficient spatial queries.
 
         Args:
-            method: Indexing method ("cKDTree" or "HNSW")
-            **kwargs: Additional arguments for the indexing method
+            method: Indexing method ("cKDTree" or "HNSW").
+            **kwargs: Additional arguments for the indexing method.
 
         Returns:
-            Spatial index object
+            The built spatial index object.
         """
         if method == "cKDTree":
-            return self._build_ckdtree_index(**kwargs)
+            self._sindex = self._build_ckdtree_index(**kwargs)
         elif method == "HNSW":
-            return self._build_hnsw_index(**kwargs)
+            self._sindex = self._build_hnsw_index(**kwargs)
         else:
             raise ValueError(
-                f"Unknown indexing method: {method}. Use 'cKDTree' or 'HNSW'"
+                f"Unknown indexing method: {method}. Use 'cKDTree' or 'HNSW'."
             )
+
+        return self._sindex
+
 
     def _build_ckdtree_index(self, **kwargs):
         """Build cKDTree spatial index (default method)."""
@@ -608,12 +611,13 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return indices, distances
 
-    def query_ball3d(self, points: Iterable[tuple[float, float, float]], r: float):
+    def query_ball3d(self, points: Iterable[tuple[float, float, float]], r: float, method: str = "cKDTree"):
         """Find all neighbors within radius r in 3D space.
 
         Args:
             points: Iterable of (x, y, z) tuples
             r: Search radius
+            method: Indexing method to use ("cKDTree" or "HNSW")
 
         Returns:
             List of lists of indices for each query point
@@ -628,8 +632,22 @@ class GeoDataFrame3D(GeoDataFrame):
         if not valid_mask.any():
             return [[] for _ in points]
 
+        # Build default index if none exists
+        if self._sindex is None:
+            self.build_sindex(method=method)
+
         # Query spatial index
-        neighbors = self.sindex.query_ball_point(points, r=r)
+        if method == "cKDTree":
+            neighbors = self._sindex.query_ball_point(points, r=r)
+        elif method == "HNSW":
+            neighbors = []
+            for pt in points:
+                # Use a large k and filter by distance r
+                k = len(self)
+                labels, distances = self._sindex.knn_query(np.array([pt]), k=k)
+                neighbors.append([int(lbl) for lbl, dist in zip(labels[0], distances[0]) if dist <= r])
+        else:
+            raise ValueError(f"Unknown search method: {method}")
 
         # Map back to original indices
         valid_indices = np.where(valid_mask)[0]
