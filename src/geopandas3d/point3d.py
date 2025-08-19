@@ -140,8 +140,8 @@ class Point3D:
             z_new = self.z
 
             return Point3D(x_new, y_new, z_new, crs=transformer.target_crs)
-        except Exception as e:
-            raise ValueError(f"Transformation failed: {e}")
+        except Exception as err:
+            raise ValueError(f"Transformation failed: {err}") from err
 
     @classmethod
     def from_tuple(cls, coords: tuple[float, float, float], crs: Optional[Union[str, object]] = None) -> 'Point3D':

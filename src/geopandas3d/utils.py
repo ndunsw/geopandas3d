@@ -169,8 +169,8 @@ def transform_point3d_batch(points, transformer, preserve_z=True):
     # Transform x, y coordinates
     try:
         x_new, y_new = transformer.transform(x_coords, y_coords)
-    except Exception as e:
-        raise ValueError(f"Batch coordinate transformation failed: {e}")
+    except Exception as err:
+        raise ValueError(f"Batch coordinate transformation failed: {err}") from err
 
     # Handle z coordinates
     z_new = z_coords.copy() if preserve_z else z_coords

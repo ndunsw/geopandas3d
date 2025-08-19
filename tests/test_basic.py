@@ -15,7 +15,6 @@ except ImportError:
 
 # Test if GeoPandas is available
 try:
-    import geopandas as gpd
     GEOPANDAS_AVAILABLE = True
 except ImportError:
     GEOPANDAS_AVAILABLE = False

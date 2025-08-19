@@ -78,8 +78,8 @@ class SpatialIndex3D:
 
         try:
             dist, idx = self._tree.query(pts, k=k)
-        except Exception as e:
-            raise RuntimeError(f"Error querying spatial index: {e}")
+        except Exception as err:
+            raise RuntimeError(f"Error querying spatial index: {err}") from err
 
         # Normalize to arrays
         if k == 1:
@@ -125,8 +125,8 @@ class SpatialIndex3D:
 
         try:
             return self._tree.query_ball_point(pts, r)
-        except Exception as e:
-            raise RuntimeError(f"Error querying spatial index: {e}")
+        except Exception as err:
+            raise RuntimeError(f"Error querying spatial index: {err}") from err
 
     def __len__(self) -> int:
         """Return the number of points in the index."""

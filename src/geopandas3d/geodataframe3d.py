@@ -125,8 +125,8 @@ class GeoDataFrame3D(GeoDataFrame):
         try:
             from shapely.geometry import Point
             gdf["geometry"] = gdf.apply(lambda row: Point(row[x], row[y]), axis=1)
-        except ImportError:
-            raise ImportError("Shapely is required. Install with: pip install shapely")
+        except ImportError as err:
+            raise ImportError("Shapely is required. Install with: pip install shapely") from err
 
         # Store altitude in height column
         gdf[height_col] = gdf[z]
@@ -157,8 +157,8 @@ class GeoDataFrame3D(GeoDataFrame):
 
         try:
             from shapely.geometry import Point
-        except ImportError:
-            raise ImportError("Shapely is required. Install with: pip install shapely")
+        except ImportError as err:
+            raise ImportError("Shapely is required. Install with: pip install shapely") from err
 
         # Create DataFrame
         if data is None:
@@ -199,8 +199,8 @@ class GeoDataFrame3D(GeoDataFrame):
 
         try:
             from shapely.geometry import Polygon
-        except ImportError:
-            raise ImportError("Shapely is required. Install with: pip install shapely")
+        except ImportError as err:
+            raise ImportError("Shapely is required. Install with: pip install shapely") from err
 
         # Create DataFrame
         if data is None:
@@ -271,8 +271,8 @@ class GeoDataFrame3D(GeoDataFrame):
 
         try:
             from shapely.geometry import Point
-        except ImportError:
-            raise ImportError("Shapely is required. Install with: pip install shapely")
+        except ImportError as err:
+            raise ImportError("Shapely is required. Install with: pip install shapely") from err
 
         # Build 3D Points by combining existing 2D geometry with z values
         new_geom = [
@@ -389,15 +389,15 @@ class GeoDataFrame3D(GeoDataFrame):
         try:
             from scipy.spatial import cKDTree
             return cKDTree(valid_coords, **kwargs)
-        except ImportError:
-            raise ImportError("scipy is required for cKDTree indexing")
+        except ImportError as err:
+            raise ImportError("scipy is required for cKDTree indexing") from err
 
     def _build_hnsw_index(self, **kwargs):
         """Build HNSW spatial index for huge datasets."""
         try:
             import hnswlib
-        except ImportError:
-            raise ImportError("hnswlib is required for HNSW indexing. Install with: pip install hnswlib")
+        except ImportError as err:
+            raise ImportError("hnswlib is required for HNSW indexing. Install with: pip install hnswlib") from err
 
         coords_3d = self.get_3d_coordinates()
         if len(coords_3d) == 0:
@@ -466,8 +466,9 @@ class GeoDataFrame3D(GeoDataFrame):
                 try:
                     import hnswlib  # check availability
                     method = "HNSW"
-                except ImportError:
+                except ImportError as err:
                     method = "cKDTree"
+                    warnings.warn("hnswlib is required for HNSW indexing. Install with: pip install hnswlib", stacklevel=2)
             else:
                 method = "cKDTree"
 
@@ -586,72 +587,6 @@ class GeoDataFrame3D(GeoDataFrame):
         return neighbors
 
     # ----- 3D spatial joins -----
-    def sjoin_nearest3d(self, other: GeoDataFrame3D, k: int = 1, how: Literal["left", "right", "inner"] = "left",
-        suffixes: tuple[str, str] = ("_l", "_r")) -> pd.DataFrame:
-        """Join each geometry to its k nearest in 'other' using 3D distances."""
-
-        # 1) Quick exit if either frame is empty
-        if len(self) == 0 or len(other) == 0:
-            return pd.DataFrame()
-
-        # 2) Ensure both sides have built CKDTree indexes
-        if not hasattr(self, "_sindex") or self._sindex is None:
-            self._sindex = self._build_ckdtree_index()
-        if not hasattr(other, "_sindex") or other._sindex is None:
-            other._sindex = other._build_ckdtree_index()
-
-        # 3) Pull out 3D coords and filter valid rows
-        left_coords  = self.get_3d_coordinates()
-        right_coords = other.get_3d_coordinates()
-        left_valid   = ~np.isnan(left_coords).any(axis=1)
-        right_valid  = ~np.isnan(right_coords).any(axis=1)
-
-        if not left_valid.any() or not right_valid.any():
-            return pd.DataFrame()
-
-        # 4) Nearest‐neighbor search in 'other' for each valid point in 'self'
-        idx, dist = other.nearest3d(left_coords[left_valid], k=k)
-
-        # 5) Normalize shapes so that idx, dist are always (n_queries, k)
-        if k == 1:
-            idx  = idx.reshape(-1, 1)
-            dist = dist.reshape(-1, 1)
-
-        # 6) Build joined‐row list
-        rows = []
-        left_indices = np.where(left_valid)[0]
-        for i, (nbrs, dists) in enumerate(zip(idx, dist)):
-            left_idx = left_indices[i]
-            for _j, (nbr_idx, d) in enumerate(zip(nbrs, dists)):
-                if np.isnan(nbr_idx) or np.isnan(d):
-                    continue
-
-                lrow = self.iloc[left_idx]
-                rrow = other.iloc[int(nbr_idx)]
-
-                combined = pd.concat([
-                    lrow.add_suffix(suffixes[0]),
-                    rrow.add_suffix(suffixes[1])
-                ])
-                combined["distance3d"] = float(d)
-                rows.append(combined)
-
-        if not rows:
-            return pd.DataFrame()
-
-        # 7) Assemble final DataFrame and apply join semantics
-        result = pd.DataFrame(rows)
-        if how == "left":
-            return result
-        elif how == "inner":
-            return result.dropna()
-        elif how == "right":
-            return other.sjoin_nearest3d(
-                self, k=k, how="left", suffixes=(suffixes[1], suffixes[0])
-            )
-        else:
-            raise ValueError("how must be one of 'left','inner','right'")
-
     def sjoin_within_distance3d(self, other: GeoDataFrame3D, max_distance: float,
                                 how: Literal["inner", "left"] = "inner",
                                 suffixes: tuple[str, str] = ("_l", "_r")) -> pd.DataFrame:
@@ -777,8 +712,8 @@ class GeoDataFrame3D(GeoDataFrame):
         # Transform x, y coordinates
         try:
             x_new, y_new = transformer.transform(x, y)
-        except Exception as e:
-            raise ValueError(f"Coordinate transformation failed: {e}")
+        except Exception as err:
+            raise ValueError(f"Coordinate transformation failed: {err}") from err
 
         # Handle z coordinates based on CRS types
         z_new = z.copy()

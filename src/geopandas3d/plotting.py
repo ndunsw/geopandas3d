@@ -10,7 +10,6 @@ import pandas as pd
 
 try:
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
@@ -35,7 +34,7 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
         Tuple of (figure, axes)
     """
     if not MATPLOTLIB_AVAILABLE:
-        raise ImportError("Matplotlib is required. Install with: pip install matplotlib")
+        raise ImportError("Matplotlib is required for this method. Install with: pip install matplotlib")
 
     if len(gdf3d) == 0:
         warnings.warn("Empty GeoDataFrame3D - nothing to plot", stacklevel=2)

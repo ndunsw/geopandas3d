@@ -4,6 +4,7 @@ Tests for the Point3D class.
 
 import numpy as np
 import pytest
+import dataclasses
 from shapely.geometry import Point
 
 # Skip if geopandas3d is not available
@@ -33,7 +34,7 @@ class TestPoint3D:
     def test_immutable(self):
         """Test that Point3D is immutable."""
         point = Point3D(1.0, 2.0, 3.0)
-        with pytest.raises(Exception):  # dataclass frozen=True raises FrozenInstanceError
+        with pytest.raises(dataclasses.FrozenInstanceError):  # dataclass frozen=True raises FrozenInstanceError
             point.x = 5.0
 
     def test_validation_numeric(self):
