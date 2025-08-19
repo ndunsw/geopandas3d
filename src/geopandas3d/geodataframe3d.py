@@ -430,7 +430,6 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return self._sindex
 
-
     def _build_ckdtree_index(self, **kwargs):
         """Build cKDTree spatial index (default method)."""
         coords_3d = self.get_3d_coordinates()
@@ -611,7 +610,12 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return indices, distances
 
-    def query_ball3d(self, points: Iterable[tuple[float, float, float]], r: float, method: str = "cKDTree"):
+    def query_ball3d(
+        self,
+        points: Iterable[tuple[float, float, float]],
+        r: float,
+        method: str = "cKDTree",
+    ):
         """Find all neighbors within radius r in 3D space.
 
         Args:
@@ -645,7 +649,13 @@ class GeoDataFrame3D(GeoDataFrame):
                 # Use a large k and filter by distance r
                 k = len(self)
                 labels, distances = self._sindex.knn_query(np.array([pt]), k=k)
-                neighbors.append([int(lbl) for lbl, dist in zip(labels[0], distances[0]) if dist <= r])
+                neighbors.append(
+                    [
+                        int(lbl)
+                        for lbl, dist in zip(labels[0], distances[0])
+                        if dist <= r
+                    ]
+                )
         else:
             raise ValueError(f"Unknown search method: {method}")
 
