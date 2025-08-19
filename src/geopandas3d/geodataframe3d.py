@@ -15,6 +15,7 @@ import pandas as pd
 try:
     import geopandas as gpd
     from geopandas import GeoDataFrame
+
     GEOPANDAS_AVAILABLE = True
 except ImportError:
     GEOPANDAS_AVAILABLE = False
@@ -48,7 +49,9 @@ class GeoDataFrame3D(GeoDataFrame):
             *args, **kwargs: Passed to GeoDataFrame constructor
         """
         if not GEOPANDAS_AVAILABLE:
-            raise ImportError("GeoPandas is required. Install with: pip install geopandas")
+            raise ImportError(
+                "GeoPandas is required. Install with: pip install geopandas"
+            )
 
         # Initialize the parent GeoDataFrame
         super().__init__(data, *args, **kwargs)
@@ -58,12 +61,16 @@ class GeoDataFrame3D(GeoDataFrame):
 
         # Validate that height column exists
         if self.height_col not in self.columns:
-            raise ValueError(f"Height column '{self.height_col}' not found in DataFrame. "
-                           f"Available columns: {list(self.columns)}")
+            raise ValueError(
+                f"Height column '{self.height_col}' not found in DataFrame. "
+                f"Available columns: {list(self.columns)}"
+            )
 
         # Validate height column contains numeric data
         if not pd.api.types.is_numeric_dtype(self[self.height_col]):
-            raise ValueError(f"Height column '{self.height_col}' must contain numeric data")
+            raise ValueError(
+                f"Height column '{self.height_col}' must contain numeric data"
+            )
 
         # Initialize spatial index
         self._sindex = None
@@ -91,8 +98,15 @@ class GeoDataFrame3D(GeoDataFrame):
             self.geometry_type = "mixed"
 
     @classmethod
-    def from_xyz(cls, df: pd.DataFrame, x: str, y: str, z: str,
-                  crs: CRSType = None, height_col: str = "altitude") -> GeoDataFrame3D:
+    def from_xyz(
+        cls,
+        df: pd.DataFrame,
+        x: str,
+        y: str,
+        z: str,
+        crs: CRSType = None,
+        height_col: str = "altitude",
+    ) -> GeoDataFrame3D:
         """Create GeoDataFrame3D from DataFrame with x, y, z columns.
 
         Args:
@@ -107,7 +121,9 @@ class GeoDataFrame3D(GeoDataFrame):
             GeoDataFrame3D instance
         """
         if not GEOPANDAS_AVAILABLE:
-            raise ImportError("GeoPandas is required. Install with: pip install geopandas")
+            raise ImportError(
+                "GeoPandas is required. Install with: pip install geopandas"
+            )
 
         if not all(col in df.columns for col in [x, y, z]):
             raise ValueError(f"DataFrame must contain columns: {x}, {y}, {z}")
@@ -124,9 +140,12 @@ class GeoDataFrame3D(GeoDataFrame):
         # Create 2D Point geometries for GeoPandas compatibility (using x, y coordinates)
         try:
             from shapely.geometry import Point
+
             gdf["geometry"] = gdf.apply(lambda row: Point(row[x], row[y]), axis=1)
         except ImportError as err:
-            raise ImportError("Shapely is required. Install with: pip install shapely") from err
+            raise ImportError(
+                "Shapely is required. Install with: pip install shapely"
+            ) from err
 
         # Store altitude in height column
         gdf[height_col] = gdf[z]
@@ -138,9 +157,13 @@ class GeoDataFrame3D(GeoDataFrame):
         return cls(geo_df, height_col=height_col)
 
     @classmethod
-    def from_points(cls, points: list[tuple[float, float, float]],
-                    data: pd.DataFrame | None = None,
-                    crs: CRSType = None, height_col: str = "altitude") -> GeoDataFrame3D:
+    def from_points(
+        cls,
+        points: list[tuple[float, float, float]],
+        data: pd.DataFrame | None = None,
+        crs: CRSType = None,
+        height_col: str = "altitude",
+    ) -> GeoDataFrame3D:
         """Create GeoDataFrame3D from list of 3D points.
 
         Args:
@@ -153,12 +176,16 @@ class GeoDataFrame3D(GeoDataFrame):
             GeoDataFrame3D instance
         """
         if not GEOPANDAS_AVAILABLE:
-            raise ImportError("GeoPandas is required. Install with: pip install geopandas")
+            raise ImportError(
+                "GeoPandas is required. Install with: pip install geopandas"
+            )
 
         try:
             from shapely.geometry import Point
         except ImportError as err:
-            raise ImportError("Shapely is required. Install with: pip install shapely") from err
+            raise ImportError(
+                "Shapely is required. Install with: pip install shapely"
+            ) from err
 
         # Create DataFrame
         if data is None:
@@ -180,9 +207,13 @@ class GeoDataFrame3D(GeoDataFrame):
         return cls(geo_df, height_col=height_col)
 
     @classmethod
-    def from_polygons(cls, polygons: list[list[tuple[float, float, float]]],
-                      data: pd.DataFrame | None = None,
-                      crs: CRSType = None, height_col: str = "altitude") -> GeoDataFrame3D:
+    def from_polygons(
+        cls,
+        polygons: list[list[tuple[float, float, float]]],
+        data: pd.DataFrame | None = None,
+        crs: CRSType = None,
+        height_col: str = "altitude",
+    ) -> GeoDataFrame3D:
         """Create GeoDataFrame3D from list of 3D polygon vertices.
 
         Args:
@@ -195,12 +226,16 @@ class GeoDataFrame3D(GeoDataFrame):
             GeoDataFrame3D instance
         """
         if not GEOPANDAS_AVAILABLE:
-            raise ImportError("GeoPandas is required. Install with: pip install geopandas")
+            raise ImportError(
+                "GeoPandas is required. Install with: pip install geopandas"
+            )
 
         try:
             from shapely.geometry import Polygon
         except ImportError as err:
-            raise ImportError("Shapely is required. Install with: pip install shapely") from err
+            raise ImportError(
+                "Shapely is required. Install with: pip install shapely"
+            ) from err
 
         # Create DataFrame
         if data is None:
@@ -212,7 +247,10 @@ class GeoDataFrame3D(GeoDataFrame):
 
         for polygon_vertices in polygons:
             if len(polygon_vertices) < 3:
-                warnings.warn(f"Polygon with {len(polygon_vertices)} vertices skipped (need at least 3)", stacklevel=2)
+                warnings.warn(
+                    f"Polygon with {len(polygon_vertices)} vertices skipped (need at least 3)",
+                    stacklevel=2,
+                )
                 continue
 
             # Extract 2D coordinates for geometry
@@ -248,7 +286,9 @@ class GeoDataFrame3D(GeoDataFrame):
         return cls(geo_df, height_col=height_col)
 
     @classmethod
-    def from_gdf(cls, gdf: gpd.GeoDataFrame, z_column: str, geometry_column: str = None, **kwargs):
+    def from_gdf(
+        cls, gdf: gpd.GeoDataFrame, z_column: str, geometry_column: str = None, **kwargs
+    ):
         """
         Construct a GeoDataFrame3D from a 2D GeoDataFrame and a column
         representing altitude/height.
@@ -272,7 +312,9 @@ class GeoDataFrame3D(GeoDataFrame):
         try:
             from shapely.geometry import Point
         except ImportError as err:
-            raise ImportError("Shapely is required. Install with: pip install shapely") from err
+            raise ImportError(
+                "Shapely is required. Install with: pip install shapely"
+            ) from err
 
         # Build 3D Points by combining existing 2D geometry with z values
         new_geom = [
@@ -330,7 +372,9 @@ class GeoDataFrame3D(GeoDataFrame):
         maxs = valid_coords.max(axis=0)
         return (mins[0], mins[1], mins[2], maxs[0], maxs[1], maxs[2])
 
-    def get_geometry_bounds3d(self) -> list[tuple[float, float, float, float, float, float]]:
+    def get_geometry_bounds3d(
+        self,
+    ) -> list[tuple[float, float, float, float, float, float]]:
         """Get individual 3D bounds for each geometry."""
         if len(self) == 0:
             return []
@@ -343,13 +387,22 @@ class GeoDataFrame3D(GeoDataFrame):
                 elif self.geometry_type == "polygon":
                     # Get 2D bounds and add height
                     bounds_2d = geom.bounds  # (xmin, ymin, xmax, ymax)
-                    bounds_list.append((bounds_2d[0], bounds_2d[1], height,
-                                      bounds_2d[2], bounds_2d[3], height))
+                    bounds_list.append(
+                        (
+                            bounds_2d[0],
+                            bounds_2d[1],
+                            height,
+                            bounds_2d[2],
+                            bounds_2d[3],
+                            height,
+                        )
+                    )
                 else:
                     # Mixed types - use centroid
                     centroid = geom.centroid
-                    bounds_list.append((centroid.x, centroid.y, height,
-                                      centroid.x, centroid.y, height))
+                    bounds_list.append(
+                        (centroid.x, centroid.y, height, centroid.x, centroid.y, height)
+                    )
             else:
                 bounds_list.append((np.nan,) * 6)
 
@@ -371,7 +424,9 @@ class GeoDataFrame3D(GeoDataFrame):
         elif method == "HNSW":
             return self._build_hnsw_index(**kwargs)
         else:
-            raise ValueError(f"Unknown indexing method: {method}. Use 'cKDTree' or 'HNSW'")
+            raise ValueError(
+                f"Unknown indexing method: {method}. Use 'cKDTree' or 'HNSW'"
+            )
 
     def _build_ckdtree_index(self, **kwargs):
         """Build cKDTree spatial index (default method)."""
@@ -388,6 +443,7 @@ class GeoDataFrame3D(GeoDataFrame):
 
         try:
             from scipy.spatial import cKDTree
+
             return cKDTree(valid_coords, **kwargs)
         except ImportError as err:
             raise ImportError("scipy is required for cKDTree indexing") from err
@@ -397,7 +453,9 @@ class GeoDataFrame3D(GeoDataFrame):
         try:
             import hnswlib
         except ImportError as err:
-            raise ImportError("hnswlib is required for HNSW indexing. Install with: pip install hnswlib") from err
+            raise ImportError(
+                "hnswlib is required for HNSW indexing. Install with: pip install hnswlib"
+            ) from err
 
         coords_3d = self.get_3d_coordinates()
         if len(coords_3d) == 0:
@@ -412,25 +470,25 @@ class GeoDataFrame3D(GeoDataFrame):
 
         # Default HNSW parameters optimized for 3D spatial data
         default_params = {
-            'dim': 3,  # 3D coordinates
-            'max_elements': len(valid_coords),
-            'ef_construction': 200,
-            'M': 16,
-            'random_seed': 100,
-            'allow_replace_deleted': False
+            "dim": 3,  # 3D coordinates
+            "max_elements": len(valid_coords),
+            "ef_construction": 200,
+            "M": 16,
+            "random_seed": 100,
+            "allow_replace_deleted": False,
         }
 
         # Update with user parameters
         default_params.update(kwargs)
 
         # Create and configure HNSW index
-        index = hnswlib.Index(space='l2', dim=default_params['dim'])
+        index = hnswlib.Index(space="l2", dim=default_params["dim"])
         index.init_index(
-            max_elements=default_params['max_elements'],
-            ef_construction=default_params['ef_construction'],
-            M=default_params['M'],
-            random_seed=default_params['random_seed'],
-            allow_replace_deleted=default_params['allow_replace_deleted']
+            max_elements=default_params["max_elements"],
+            ef_construction=default_params["ef_construction"],
+            M=default_params["M"],
+            random_seed=default_params["random_seed"],
+            allow_replace_deleted=default_params["allow_replace_deleted"],
         )
 
         # Add data to index
@@ -461,7 +519,7 @@ class GeoDataFrame3D(GeoDataFrame):
         Returns:
             tuple: (indices, distances) arrays
         """
-        if method == "auto" and len(self) > 100000:   # Prefer HNSW for huge datasets
+        if method == "auto" and len(self) > 100000:  # Prefer HNSW for huge datasets
             method = "HNSW"
         else:
             method = "cKDTree"
@@ -479,7 +537,7 @@ class GeoDataFrame3D(GeoDataFrame):
         if isinstance(query_points, list) and len(query_points) > 0:
             if isinstance(query_points[0], (list, tuple)):
                 query_coords = np.array(query_points)
-            elif hasattr(query_points[0], 'to_array'):
+            elif hasattr(query_points[0], "to_array"):
                 query_coords = np.array([p.to_array() for p in query_points])
             else:
                 query_coords = np.array(query_points)
@@ -491,7 +549,7 @@ class GeoDataFrame3D(GeoDataFrame):
             query_coords = query_coords.reshape(1, -1)
 
         # Build index if not exists
-        if not hasattr(self, '_sindex') or self._sindex is None:
+        if not hasattr(self, "_sindex") or self._sindex is None:
             self._sindex = self._build_ckdtree_index()
 
         if self._sindex is None:
@@ -505,12 +563,12 @@ class GeoDataFrame3D(GeoDataFrame):
         if k == 1:
             # cKDTree.query gives shape (n_queries,) or scalar if n_queries==1
             distances = np.atleast_1d(distances)
-            indices   = np.atleast_1d(indices)
+            indices = np.atleast_1d(indices)
         else:
             # cKDTree.query gives shape (n_queries,k) or (k,) if n_queries==1
             if distances.ndim == 1:
                 distances = distances.reshape(1, -1)
-                indices   = indices.reshape(1, -1)
+                indices = indices.reshape(1, -1)
 
         return indices, distances
 
@@ -520,7 +578,7 @@ class GeoDataFrame3D(GeoDataFrame):
         if isinstance(query_points, list) and len(query_points) > 0:
             if isinstance(query_points[0], (list, tuple)):
                 query_coords = np.array(query_points)
-            elif hasattr(query_points[0], 'to_array'):
+            elif hasattr(query_points[0], "to_array"):
                 query_coords = np.array([p.to_array() for p in query_points])
             else:
                 query_coords = np.array(query_points)
@@ -532,14 +590,14 @@ class GeoDataFrame3D(GeoDataFrame):
             query_coords = query_coords.reshape(1, -1)
 
         # Build index if not exists
-        if not hasattr(self, '_hnsw_index') or self._hnsw_index is None:
+        if not hasattr(self, "_hnsw_index") or self._hnsw_index is None:
             self._hnsw_index = self._build_hnsw_index(**kwargs)
 
         if self._hnsw_index is None:
             return np.array([]), np.array([])
 
         # Set search parameters
-        ef = kwargs.get('ef', 50)
+        ef = kwargs.get("ef", 50)
         self._hnsw_index.set_ef(ef)
 
         # Query the index
@@ -581,9 +639,13 @@ class GeoDataFrame3D(GeoDataFrame):
         return neighbors
 
     # ----- 3D spatial joins -----
-    def sjoin_within_distance3d(self, other: GeoDataFrame3D, max_distance: float,
-                                how: Literal["inner", "left"] = "inner",
-                                suffixes: tuple[str, str] = ("_l", "_r")) -> pd.DataFrame:
+    def sjoin_within_distance3d(
+        self,
+        other: GeoDataFrame3D,
+        max_distance: float,
+        how: Literal["inner", "left"] = "inner",
+        suffixes: tuple[str, str] = ("_l", "_r"),
+    ) -> pd.DataFrame:
         """Join pairs within max_distance using 3D distances.
 
         Args:
@@ -635,8 +697,9 @@ class GeoDataFrame3D(GeoDataFrame):
                 d = np.linalg.norm(left_coords[left_idx] - right_coords[j])
 
                 # Combine rows with suffixes
-                combined = pd.concat([lrow.add_suffix(suffixes[0]),
-                                   rrow.add_suffix(suffixes[1])])
+                combined = pd.concat(
+                    [lrow.add_suffix(suffixes[0]), rrow.add_suffix(suffixes[1])]
+                )
                 combined["distance3d"] = float(d)
                 rows.append(combined)
 
@@ -653,6 +716,7 @@ class GeoDataFrame3D(GeoDataFrame):
     def plot3d(self, column=None, ax=None, **kwargs):
         """Plot the 3D data using matplotlib."""
         from .plotting import plot3d
+
         return plot3d(self, column=column, ax=ax, **kwargs)
 
     def to_crs3d(self, crs, inplace=False, transformer=None):
@@ -693,11 +757,7 @@ class GeoDataFrame3D(GeoDataFrame):
 
         # Create transformer if not provided
         if transformer is None:
-            transformer = Transformer.from_crs(
-                source_crs,
-                target_crs,
-                always_xy=True
-            )
+            transformer = Transformer.from_crs(source_crs, target_crs, always_xy=True)
 
         # Get 3D coordinates
         coords_3d = self.get_3d_coordinates()
@@ -713,14 +773,14 @@ class GeoDataFrame3D(GeoDataFrame):
         z_new = z.copy()
 
         # If transforming between geographic CRS, z might need unit conversion
-        if (source_crs.is_geographic and target_crs.is_geographic):
+        if source_crs.is_geographic and target_crs.is_geographic:
             # Both are geographic - z units should be compatible
             pass
-        elif (source_crs.is_geographic and not target_crs.is_geographic):
+        elif source_crs.is_geographic and not target_crs.is_geographic:
             # Geographic to projected - z units might need conversion
             # This is a simplified approach - in practice you might want more sophisticated handling
             pass
-        elif (not source_crs.is_geographic and target_crs.is_geographic):
+        elif not source_crs.is_geographic and target_crs.is_geographic:
             # Projected to geographic - z units might need conversion
             pass
         else:
@@ -730,12 +790,13 @@ class GeoDataFrame3D(GeoDataFrame):
         # Create new geometry column with transformed coordinates
         new_geometries = []
         for i, geom in enumerate(self.geometry):
-            if geom.geom_type == 'Point':
+            if geom.geom_type == "Point":
                 # Create new Point with transformed coordinates
                 from shapely.geometry import Point
+
                 new_point = Point(x_new[i], y_new[i])
                 new_geometries.append(new_point)
-            elif geom.geom_type == 'Polygon':
+            elif geom.geom_type == "Polygon":
                 # Transform polygon coordinates properly
                 coords = list(geom.exterior.coords)
                 new_coords = []
@@ -750,6 +811,7 @@ class GeoDataFrame3D(GeoDataFrame):
                         new_coords.append((old_x, old_y))
 
                 from shapely.geometry import Polygon
+
                 new_polygon = Polygon(new_coords)
                 new_geometries.append(new_polygon)
             else:
@@ -758,7 +820,7 @@ class GeoDataFrame3D(GeoDataFrame):
 
         # Create new height column with transformed z values
         new_height_col = self[self.height_col].copy()
-        new_height_col.iloc[:len(z_new)] = z_new
+        new_height_col.iloc[: len(z_new)] = z_new
 
         # Create new DataFrame
         new_data = self.drop(columns=[self.height_col, self.geometry.name])
@@ -780,7 +842,7 @@ class GeoDataFrame3D(GeoDataFrame):
                 new_data,
                 geometry=self.geometry.name,
                 height_col=self.height_col,
-                crs=target_crs
+                crs=target_crs,
             )
 
     def transform3d(self, transformer, inplace=False):
@@ -832,12 +894,7 @@ class GeoDataFrame3D(GeoDataFrame):
         source_crs = CRS(source_crs)
 
         # Create and return transformer
-        return Transformer.from_crs(
-            source_crs,
-            target_crs,
-            always_xy=True,
-            **kwargs
-        )
+        return Transformer.from_crs(source_crs, target_crs, always_xy=True, **kwargs)
 
     def sjoin_nearest3d(self, other, k=1, method="auto", **kwargs):
         """Spatial join to find k nearest neighbors between two GeoDataFrame3D objects.
@@ -871,12 +928,12 @@ class GeoDataFrame3D(GeoDataFrame):
 
         # PATCH: always make (n_queries, k) arrays
         # wrap scalars → arrays
-        indices   = np.atleast_1d(indices)
+        indices = np.atleast_1d(indices)
         distances = np.atleast_1d(distances)
 
         # if result is 1-D (shape (n_queries,)), turn it into (n_queries, 1)
         if indices.ndim == 1:
-            indices   = indices.reshape(-1, 1)
+            indices = indices.reshape(-1, 1)
             distances = distances.reshape(-1, 1)
 
         # Create joined data
@@ -904,8 +961,8 @@ class GeoDataFrame3D(GeoDataFrame):
                     combined_row[self.height_col] = row_self[self.height_col]
 
                     # Add distance information
-                    combined_row['distance'] = distance
-                    combined_row['neighbor_rank'] = j
+                    combined_row["distance"] = distance
+                    combined_row["neighbor_rank"] = j
 
                     joined_data.append(combined_row)
 
@@ -918,9 +975,9 @@ class GeoDataFrame3D(GeoDataFrame):
         rename_map = {}
         for c in df_joined.columns:
             if c.startswith("left_"):
-                rename_map[c] = f"{c[len('left_'):]}_l"
+                rename_map[c] = f"{c[len('left_') :]}_l"
             elif c.startswith("right_"):
-                rename_map[c] = f"{c[len('right_'):]}_r"
+                rename_map[c] = f"{c[len('right_') :]}_r"
         if "distance" in df_joined.columns:
             rename_map["distance"] = "distance3d"
 
@@ -930,7 +987,7 @@ class GeoDataFrame3D(GeoDataFrame):
             df_joined,
             geometry=self.geometry.name,
             height_col=self.height_col,
-            crs=self.crs
+            crs=self.crs,
         )
 
     # ----- GeoPandas method delegation -----
@@ -938,7 +995,9 @@ class GeoDataFrame3D(GeoDataFrame):
         """Delegate unknown attributes to the parent GeoDataFrame."""
         if hasattr(super(), name):
             return getattr(super(), name)
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{name}'"
+        )
 
     def __repr__(self):
         """String representation."""

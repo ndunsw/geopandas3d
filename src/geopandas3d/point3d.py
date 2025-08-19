@@ -28,6 +28,7 @@ class Point3D:
         z: Z coordinate (altitude or height)
         crs: Optional CRS specification (string or CRS object)
     """
+
     x: float
     y: float
     z: float
@@ -35,10 +36,18 @@ class Point3D:
 
     def __post_init__(self):
         """Validate coordinates after initialization."""
-        if not isinstance(self.x, (int, float)) or not isinstance(self.y, (int, float)) or not isinstance(self.z, (int, float)):
+        if (
+            not isinstance(self.x, (int, float))
+            or not isinstance(self.y, (int, float))
+            or not isinstance(self.z, (int, float))
+        ):
             raise ValueError("Coordinates must be numeric values")
 
-        if not np.isfinite(self.x) or not np.isfinite(self.y) or not np.isfinite(self.z):
+        if (
+            not np.isfinite(self.x)
+            or not np.isfinite(self.y)
+            or not np.isfinite(self.z)
+        ):
             raise ValueError("Coordinates must be finite values")
 
     def __iter__(self):
@@ -87,7 +96,7 @@ class Point3D:
         """Convert to Shapely Point (2D, z coordinate is lost)."""
         return Point(self.x, self.y)
 
-    def distance_to(self, other: 'Point3D') -> float:
+    def distance_to(self, other: "Point3D") -> float:
         """Calculate 3D Euclidean distance to another point."""
         if not isinstance(other, Point3D):
             raise TypeError("Can only calculate distance to another Point3D")
@@ -95,18 +104,18 @@ class Point3D:
         dx = self.x - other.x
         dy = self.y - other.y
         dz = self.z - other.z
-        return np.sqrt(dx*dx + dy*dy + dz*dz)
+        return np.sqrt(dx * dx + dy * dy + dz * dz)
 
-    def distance_to_2d(self, other: 'Point3D') -> float:
+    def distance_to_2d(self, other: "Point3D") -> float:
         """Calculate 2D Euclidean distance to another point (ignoring z)."""
         if not isinstance(other, Point3D):
             raise TypeError("Can only calculate distance to another Point3D")
 
         dx = self.x - other.x
         dy = self.y - other.y
-        return np.sqrt(dx*dx + dy*dy)
+        return np.sqrt(dx * dx + dy * dy)
 
-    def midpoint(self, other: 'Point3D') -> 'Point3D':
+    def midpoint(self, other: "Point3D") -> "Point3D":
         """Calculate midpoint between this point and another."""
         if not isinstance(other, Point3D):
             raise TypeError("Can only calculate midpoint with another Point3D")
@@ -120,7 +129,7 @@ class Point3D:
 
         return Point3D(mid_x, mid_y, mid_z, crs)
 
-    def transform(self, transformer) -> 'Point3D':
+    def transform(self, transformer) -> "Point3D":
         """
         Transform coordinates using a pyproj.Transformer.
 
@@ -144,35 +153,45 @@ class Point3D:
             raise ValueError(f"Transformation failed: {err}") from err
 
     @classmethod
-    def from_tuple(cls, coords: tuple[float, float, float], crs: Optional[Union[str, object]] = None) -> 'Point3D':
+    def from_tuple(
+        cls,
+        coords: tuple[float, float, float],
+        crs: Optional[Union[str, object]] = None,
+    ) -> "Point3D":
         """Create Point3D from tuple."""
         if len(coords) != 3:
             raise ValueError("Tuple must have exactly 3 elements")
         return cls(coords[0], coords[1], coords[2], crs)
 
     @classmethod
-    def from_list(cls, coords: list[float], crs: Optional[Union[str, object]] = None) -> 'Point3D':
+    def from_list(
+        cls, coords: list[float], crs: Optional[Union[str, object]] = None
+    ) -> "Point3D":
         """Create Point3D from list."""
         if len(coords) != 3:
             raise ValueError("List must have exactly 3 elements")
         return cls(coords[0], coords[1], coords[2], crs)
 
     @classmethod
-    def from_array(cls, coords: np.ndarray, crs: Optional[Union[str, object]] = None) -> 'Point3D':
+    def from_array(
+        cls, coords: np.ndarray, crs: Optional[Union[str, object]] = None
+    ) -> "Point3D":
         """Create Point3D from numpy array."""
         if coords.size != 3:
             raise ValueError("Array must have exactly 3 elements")
         return cls(float(coords[0]), float(coords[1]), float(coords[2]), crs)
 
     @classmethod
-    def from_shapely(cls, point: Point, z: float, crs: Optional[Union[str, object]] = None) -> 'Point3D':
+    def from_shapely(
+        cls, point: Point, z: float, crs: Optional[Union[str, object]] = None
+    ) -> "Point3D":
         """Create Point3D from Shapely Point and z coordinate."""
         if not isinstance(point, Point):
             raise TypeError("Input must be a Shapely Point")
         return cls(point.x, point.y, z, crs)
 
     @classmethod
-    def origin(cls, crs: Optional[Union[str, object]] = None) -> 'Point3D':
+    def origin(cls, crs: Optional[Union[str, object]] = None) -> "Point3D":
         """Create Point3D at origin (0, 0, 0)."""
         return cls(0.0, 0.0, 0.0, crs)
 

@@ -6,7 +6,6 @@ utility functions for transforming coordinates between different CRS
 while preserving 3D information.
 """
 
-
 # Import our geopandas3d functionality
 from geopandas3d import (
     GeoDataFrame3D,
@@ -23,15 +22,12 @@ def demo_basic_crs_transformation():
     # Create sample data in WGS84 (EPSG:4326)
     coords_3d = [
         (-122.4194, 37.7749, 100),  # San Francisco
-        (-74.0060, 40.7128, 50),   # New York
+        (-74.0060, 40.7128, 50),  # New York
         (-118.2437, 34.0522, 200),  # Los Angeles
     ]
 
     # Create GeoDataFrame3D
-    gdf3d = GeoDataFrame3D.from_points(
-        coords_3d,
-        crs="EPSG:4326"
-    )
+    gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
     print(f"Original CRS: {gdf3d.crs}")
     print("Original coordinates:")
@@ -68,7 +64,7 @@ def demo_advanced_transformation():
 
     gdf3d_utm = GeoDataFrame3D.from_points(
         coords_3d,
-        crs="EPSG:32610"  # UTM Zone 10N
+        crs="EPSG:32610",  # UTM Zone 10N
     )
 
     print(f"UTM CRS: {gdf3d_utm.crs}")
@@ -101,10 +97,7 @@ def demo_custom_transformer():
         (-74.0060, 40.7128, 50),
     ]
 
-    gdf3d = GeoDataFrame3D.from_points(
-        coords_3d,
-        crs="EPSG:4326"
-    )
+    gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
     # Get a custom transformer
     transformer = gdf3d.get_transformer("EPSG:3857")
@@ -140,9 +133,8 @@ def demo_point3d_batch_transformation():
 
     # Create transformer
     import pyproj
-    transformer = pyproj.Transformer.from_crs(
-        "EPSG:4326", "EPSG:3857", always_xy=True
-    )
+
+    transformer = pyproj.Transformer.from_crs("EPSG:4326", "EPSG:3857", always_xy=True)
 
     # Transform batch
     transformed_points = transform_point3d_batch(point3d_list, transformer)
@@ -161,7 +153,7 @@ def demo_crs_validation():
     crs_combinations = [
         ("EPSG:4326", "EPSG:3857"),  # Geographic to Projected
         ("EPSG:3857", "EPSG:4326"),  # Projected to Geographic
-        ("EPSG:32610", "EPSG:32611"), # Projected to Projected
+        ("EPSG:32610", "EPSG:32611"),  # Projected to Projected
         ("EPSG:4326", "EPSG:4326"),  # Same CRS
     ]
 
@@ -171,16 +163,20 @@ def demo_crs_validation():
         compatibility = validate_crs_compatibility(source, target)
 
         print(f"  Compatible: {compatibility['compatible']}")
-        if compatibility['warnings']:
+        if compatibility["warnings"]:
             print("  Warnings:")
-            for warning in compatibility['warnings']:
+            for warning in compatibility["warnings"]:
                 print(f"    - {warning}")
 
-        source_info = compatibility['source_info']
-        target_info = compatibility['target_info']
+        source_info = compatibility["source_info"]
+        target_info = compatibility["target_info"]
 
-        print(f"  Source: {source_info['name']} ({'Geographic' if source_info['is_geographic'] else 'Projected'})")
-        print(f"  Target: {target_info['name']} ({'Geographic' if target_info['is_geographic'] else 'Projected'})")
+        print(
+            f"  Source: {source_info['name']} ({'Geographic' if source_info['is_geographic'] else 'Projected'})"
+        )
+        print(
+            f"  Target: {target_info['name']} ({'Geographic' if target_info['is_geographic'] else 'Projected'})"
+        )
         print()
 
 
@@ -194,10 +190,7 @@ def demo_inplace_transformation():
         (-74.0060, 40.7128, 50),
     ]
 
-    gdf3d = GeoDataFrame3D.from_points(
-        coords_3d,
-        crs="EPSG:4326"
-    )
+    gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
     print(f"Original CRS: {gdf3d.crs}")
     print("Original coordinates:")

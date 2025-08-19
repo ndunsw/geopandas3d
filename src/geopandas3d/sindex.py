@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -11,6 +10,7 @@ from scipy.spatial import cKDTree
 @dataclass
 class SpatialIndex3D:
     """A lightweight 3D spatial index for point geometries using cKDTree."""
+
     coords: np.ndarray
     leafsize: int = 16
     _tree: cKDTree | None = None
@@ -32,10 +32,7 @@ class SpatialIndex3D:
             return self
 
         self._tree = cKDTree(
-            self.coords,
-            leafsize=self.leafsize,
-            compact_nodes=True,
-            balanced_tree=True
+            self.coords, leafsize=self.leafsize, compact_nodes=True, balanced_tree=True
         )
         return self
 
@@ -44,7 +41,9 @@ class SpatialIndex3D:
         """Check if the spatial index is built and ready."""
         return self._tree is not None
 
-    def query(self, points: Iterable[tuple[float,float,float]], k: int = 1) -> tuple[np.ndarray, np.ndarray]:
+    def query(
+        self, points: Iterable[tuple[float, float, float]], k: int = 1
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Find k nearest neighbors for given points.
 
         Args:
@@ -61,9 +60,11 @@ class SpatialIndex3D:
             self.build()
 
         if k > len(self.coords):
-            raise ValueError(f"k ({k}) cannot be larger than number of points ({len(self.coords)})")
+            raise ValueError(
+                f"k ({k}) cannot be larger than number of points ({len(self.coords)})"
+            )
 
-        pts = np.asarray(list(points), dtype='float64')
+        pts = np.asarray(list(points), dtype="float64")
         if pts.size == 0:
             return np.array([]), np.array([])
 
@@ -91,7 +92,9 @@ class SpatialIndex3D:
 
         return idx, dist
 
-    def query_ball(self, points: Iterable[tuple[float,float,float]], r: float) -> list[list[int]]:
+    def query_ball(
+        self, points: Iterable[tuple[float, float, float]], r: float
+    ) -> list[list[int]]:
         """Find all neighbors within radius r for each query point.
 
         Args:
@@ -110,7 +113,7 @@ class SpatialIndex3D:
         if r <= 0:
             raise ValueError(f"Radius must be positive, got {r}")
 
-        pts = np.asarray(list(points), dtype='float64')
+        pts = np.asarray(list(points), dtype="float64")
         if pts.size == 0:
             return []
 

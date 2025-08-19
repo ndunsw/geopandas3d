@@ -35,7 +35,9 @@ class TestPoint3D:
     def test_immutable(self):
         """Test that Point3D is immutable."""
         point = Point3D(1.0, 2.0, 3.0)
-        with pytest.raises(dataclasses.FrozenInstanceError):  # dataclass frozen=True raises FrozenInstanceError
+        with pytest.raises(
+            dataclasses.FrozenInstanceError
+        ):  # dataclass frozen=True raises FrozenInstanceError
             point.x = 5.0
 
     def test_validation_numeric(self):
@@ -248,6 +250,7 @@ class TestPoint3D:
         class MockTransformer:
             def transform(self, x, y):
                 return x + 1, y + 1
+
             @property
             def target_crs(self):
                 return "EPSG:3857"

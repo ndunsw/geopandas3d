@@ -10,15 +10,24 @@ import pandas as pd
 
 try:
     import matplotlib.pyplot as plt
+
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
-    warnings.warn("Matplotlib not available. Install with: pip install matplotlib", stacklevel=2)
+    warnings.warn(
+        "Matplotlib not available. Install with: pip install matplotlib", stacklevel=2
+    )
 
 
-def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
-           figsize: tuple[int, int] = (10, 8), alpha: float = 0.7,
-           s: int = 50, **kwargs) -> tuple[Any, Any]:
+def plot3d(
+    gdf3d,
+    column: Optional[str] = None,
+    cmap: str = "viridis",
+    figsize: tuple[int, int] = (10, 8),
+    alpha: float = 0.7,
+    s: int = 50,
+    **kwargs,
+) -> tuple[Any, Any]:
     """Create a 3D plot of the GeoDataFrame3D.
 
     Args:
@@ -34,7 +43,9 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
         Tuple of (figure, axes)
     """
     if not MATPLOTLIB_AVAILABLE:
-        raise ImportError("Matplotlib is required for this method. Install with: pip install matplotlib")
+        raise ImportError(
+            "Matplotlib is required for this method. Install with: pip install matplotlib"
+        )
 
     if len(gdf3d) == 0:
         warnings.warn("Empty GeoDataFrame3D - nothing to plot", stacklevel=2)
@@ -42,7 +53,7 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
 
     # Create figure and 3D axes
     fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
 
     # Get 3D coordinates
     coords = gdf3d.get_3d_coordinates()
@@ -58,8 +69,16 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
     if column is not None and column in gdf3d.columns:
         color_data = gdf3d[column].iloc[valid_mask]
         if pd.api.types.is_numeric_dtype(color_data):
-            scatter = ax.scatter(valid_coords[:, 0], valid_coords[:, 1], valid_coords[:, 2],
-                               c=color_data, cmap=cmap, s=s, alpha=alpha, **kwargs)
+            scatter = ax.scatter(
+                valid_coords[:, 0],
+                valid_coords[:, 1],
+                valid_coords[:, 2],
+                c=color_data,
+                cmap=cmap,
+                s=s,
+                alpha=alpha,
+                **kwargs,
+            )
             plt.colorbar(scatter, ax=ax, label=column)
         else:
             # Categorical data
@@ -70,19 +89,33 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
                 mask = color_data == category
                 if mask.any():
                     cat_coords = valid_coords[mask]
-                    ax.scatter(cat_coords[:, 0], cat_coords[:, 1], cat_coords[:, 2],
-                             c=[colors[i]], label=str(category), s=s, alpha=alpha, **kwargs)
+                    ax.scatter(
+                        cat_coords[:, 0],
+                        cat_coords[:, 1],
+                        cat_coords[:, 2],
+                        c=[colors[i]],
+                        label=str(category),
+                        s=s,
+                        alpha=alpha,
+                        **kwargs,
+                    )
             ax.legend()
     else:
         # No column specified - use default colors
-        ax.scatter(valid_coords[:, 0], valid_coords[:, 1], valid_coords[:, 2],
-                  s=s, alpha=alpha, **kwargs)
+        ax.scatter(
+            valid_coords[:, 0],
+            valid_coords[:, 1],
+            valid_coords[:, 2],
+            s=s,
+            alpha=alpha,
+            **kwargs,
+        )
 
     # Set labels and title
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(f'3D Plot of {len(gdf3d)} {gdf3d.geometry_type}s')
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title(f"3D Plot of {len(gdf3d)} {gdf3d.geometry_type}s")
 
     # Set equal aspect ratio for better visualization
     try:
@@ -94,9 +127,15 @@ def plot3d(gdf3d, column: Optional[str] = None, cmap: str = "viridis",
     return fig, ax
 
 
-def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
-                   figsize: tuple[int, int] = (10, 8), cmap: str = "viridis",
-                   s: int = 50, alpha: float = 0.7, **kwargs) -> tuple[Any, Any]:
+def plot_points_3d(
+    points: np.ndarray,
+    values: Optional[np.ndarray] = None,
+    figsize: tuple[int, int] = (10, 8),
+    cmap: str = "viridis",
+    s: int = 50,
+    alpha: float = 0.7,
+    **kwargs,
+) -> tuple[Any, Any]:
     """Create a 3D scatter plot of points.
 
     Args:
@@ -112,7 +151,9 @@ def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
         Tuple of (figure, axes)
     """
     if not MATPLOTLIB_AVAILABLE:
-        raise ImportError("Matplotlib is required. Install with: pip install matplotlib")
+        raise ImportError(
+            "Matplotlib is required. Install with: pip install matplotlib"
+        )
 
     if len(points) == 0:
         warnings.warn("No points to plot", stacklevel=2)
@@ -120,7 +161,7 @@ def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
 
     # Create figure and 3D axes
     fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
 
     # Filter valid coordinates
     valid_mask = ~np.isnan(points).any(axis=1)
@@ -134,8 +175,16 @@ def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
     if values is not None:
         valid_values = values[valid_mask]
         if pd.api.types.is_numeric_dtype(valid_values):
-            scatter = ax.scatter(valid_points[:, 0], valid_points[:, 1], valid_points[:, 2],
-                               c=valid_values, cmap=cmap, s=s, alpha=alpha, **kwargs)
+            scatter = ax.scatter(
+                valid_points[:, 0],
+                valid_points[:, 1],
+                valid_points[:, 2],
+                c=valid_values,
+                cmap=cmap,
+                s=s,
+                alpha=alpha,
+                **kwargs,
+            )
             plt.colorbar(scatter, ax=ax)
         else:
             # Categorical values
@@ -146,18 +195,32 @@ def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
                 mask = valid_values == category
                 if mask.any():
                     cat_points = valid_points[mask]
-                    ax.scatter(cat_points[:, 0], cat_points[:, 1], cat_points[:, 2],
-                             c=[colors[i]], label=str(category), s=s, alpha=alpha, **kwargs)
+                    ax.scatter(
+                        cat_points[:, 0],
+                        cat_points[:, 1],
+                        cat_points[:, 2],
+                        c=[colors[i]],
+                        label=str(category),
+                        s=s,
+                        alpha=alpha,
+                        **kwargs,
+                    )
             ax.legend()
     else:
-        ax.scatter(valid_points[:, 0], valid_points[:, 1], valid_points[:, 2],
-                  s=s, alpha=alpha, **kwargs)
+        ax.scatter(
+            valid_points[:, 0],
+            valid_points[:, 1],
+            valid_points[:, 2],
+            s=s,
+            alpha=alpha,
+            **kwargs,
+        )
 
     # Set labels
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(f'3D Scatter Plot of {len(valid_points)} Points')
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title(f"3D Scatter Plot of {len(valid_points)} Points")
 
     # Set equal aspect ratio
     try:
@@ -168,8 +231,13 @@ def plot_points_3d(points: np.ndarray, values: Optional[np.ndarray] = None,
     return fig, ax
 
 
-def plot_polygons_3d(polygons: list, heights: list, figsize: tuple[int, int] = (10, 8),
-                     alpha: float = 0.7, **kwargs) -> tuple[Any, Any]:
+def plot_polygons_3d(
+    polygons: list,
+    heights: list,
+    figsize: tuple[int, int] = (10, 8),
+    alpha: float = 0.7,
+    **kwargs,
+) -> tuple[Any, Any]:
     """Create a 3D plot of polygons at different heights.
 
     Args:
@@ -183,7 +251,9 @@ def plot_polygons_3d(polygons: list, heights: list, figsize: tuple[int, int] = (
         Tuple of (figure, axes)
     """
     if not MATPLOTLIB_AVAILABLE:
-        raise ImportError("Matplotlib is required. Install with: pip install matplotlib")
+        raise ImportError(
+            "Matplotlib is required. Install with: pip install matplotlib"
+        )
 
     if len(polygons) == 0:
         warnings.warn("No polygons to plot", stacklevel=2)
@@ -191,7 +261,7 @@ def plot_polygons_3d(polygons: list, heights: list, figsize: tuple[int, int] = (
 
     # Create figure and 3D axes
     fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111, projection='3d')
+    ax = fig.add_subplot(111, projection="3d")
 
     # Plot each polygon
     for i, (polygon, height) in enumerate(zip(polygons, heights)):
@@ -200,7 +270,7 @@ def plot_polygons_3d(polygons: list, heights: list, figsize: tuple[int, int] = (
 
         try:
             # Extract polygon coordinates
-            if hasattr(polygon, 'exterior'):
+            if hasattr(polygon, "exterior"):
                 coords = list(polygon.exterior.coords)
             else:
                 coords = list(polygon.coords)
@@ -221,10 +291,10 @@ def plot_polygons_3d(polygons: list, heights: list, figsize: tuple[int, int] = (
             continue
 
     # Set labels
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title(f'3D Polygon Plot of {len(polygons)} Polygons')
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title(f"3D Polygon Plot of {len(polygons)} Polygons")
 
     # Set equal aspect ratio
     try:

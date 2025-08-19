@@ -2,7 +2,6 @@
 Utility functions for 3D spatial operations.
 """
 
-
 import numpy as np
 
 
@@ -37,7 +36,7 @@ def distance3d(p1: tuple[float, float, float], p2: tuple[float, float, float]) -
     Returns:
         3D distance between points
     """
-    return np.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 + (p1[2] - p2[2])**2)
+    return np.sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2)
 
 
 def centroid3d(points: list[tuple[float, float, float]]) -> tuple[float, float, float]:
@@ -84,8 +83,9 @@ def polygon_area3d(vertices: list[tuple[float, float, float]]) -> float:
     return abs(area) / 2.0
 
 
-def is_point_in_polygon3d(point: tuple[float, float, float],
-                          vertices: list[tuple[float, float, float]]) -> bool:
+def is_point_in_polygon3d(
+    point: tuple[float, float, float], vertices: list[tuple[float, float, float]]
+) -> bool:
     """Check if a 3D point is inside a 3D polygon (using 2D projection).
 
     Args:
@@ -108,10 +108,13 @@ def is_point_in_polygon3d(point: tuple[float, float, float],
 
     for i in range(n):
         j = (i + 1) % n
-        if (((coords_2d[i][1] > point_2d[1]) != (coords_2d[j][1] > point_2d[1])) and
-            (point_2d[0] < (coords_2d[j][0] - coords_2d[i][0]) *
-             (point_2d[1] - coords_2d[i][1]) / (coords_2d[j][1] - coords_2d[i][1]) +
-             coords_2d[i][0])):
+        if ((coords_2d[i][1] > point_2d[1]) != (coords_2d[j][1] > point_2d[1])) and (
+            point_2d[0]
+            < (coords_2d[j][0] - coords_2d[i][0])
+            * (point_2d[1] - coords_2d[i][1])
+            / (coords_2d[j][1] - coords_2d[i][1])
+            + coords_2d[i][0]
+        ):
             inside = not inside
 
     return inside
@@ -140,8 +143,14 @@ def bounds3d(coords_3d):
     min_coords = np.min(valid_coords, axis=0)
     max_coords = np.max(valid_coords, axis=0)
 
-    return (min_coords[0], min_coords[1], min_coords[2],
-            max_coords[0], max_coords[1], max_coords[2])
+    return (
+        min_coords[0],
+        min_coords[1],
+        min_coords[2],
+        max_coords[0],
+        max_coords[1],
+        max_coords[2],
+    )
 
 
 def transform_point3d_batch(points, transformer, preserve_z=True):
@@ -178,12 +187,7 @@ def transform_point3d_batch(points, transformer, preserve_z=True):
     # Create new Point3D objects
     transformed_points = []
     for i, _point in enumerate(points):
-        new_point = Point3D(
-            x_new[i],
-            y_new[i],
-            z_new[i],
-            crs=transformer.target_crs
-        )
+        new_point = Point3D(x_new[i], y_new[i], z_new[i], crs=transformer.target_crs)
         transformed_points.append(new_point)
 
     return transformed_points
@@ -207,32 +211,32 @@ def get_crs_info(crs):
         crs_obj = CRS(crs)
 
     info = {
-        'is_geographic': crs_obj.is_geographic,
-        'is_projected': crs_obj.is_projected,
-        'is_compound': crs_obj.is_compound,
-        'name': crs_obj.name,
-        'to_string': str(crs_obj)
+        "is_geographic": crs_obj.is_geographic,
+        "is_projected": crs_obj.is_projected,
+        "is_compound": crs_obj.is_compound,
+        "name": crs_obj.name,
+        "to_string": str(crs_obj),
     }
 
     # Handle authority information safely
     try:
-        if hasattr(crs_obj, 'authority'):
-            info['authority'] = crs_obj.authority
-        elif hasattr(crs_obj, 'to_authority'):
-            info['authority'] = crs_obj.to_authority()
+        if hasattr(crs_obj, "authority"):
+            info["authority"] = crs_obj.authority
+        elif hasattr(crs_obj, "to_authority"):
+            info["authority"] = crs_obj.to_authority()
         else:
-            info['authority'] = None
+            info["authority"] = None
     except Exception:
-        info['authority'] = None
+        info["authority"] = None
 
     # Get units information
     try:
-        if hasattr(crs_obj, 'axis_info'):
-            info['units'] = [axis.unit_name for axis in crs_obj.axis_info]
+        if hasattr(crs_obj, "axis_info"):
+            info["units"] = [axis.unit_name for axis in crs_obj.axis_info]
         else:
-            info['units'] = None
+            info["units"] = None
     except Exception:
-        info['units'] = None
+        info["units"] = None
 
     return info
 
@@ -252,29 +256,28 @@ def validate_crs_compatibility(source_crs, target_crs):
     target_info = get_crs_info(target_crs)
 
     compatibility = {
-        'compatible': True,
-        'warnings': [],
-        'source_info': source_info,
-        'target_info': target_info
+        "compatible": True,
+        "warnings": [],
+        "source_info": source_info,
+        "target_info": target_info,
     }
 
     # Check for potential issues
-    if source_info['is_geographic'] and target_info['is_projected']:
-        compatibility['warnings'].append(
+    if source_info["is_geographic"] and target_info["is_projected"]:
+        compatibility["warnings"].append(
             "Transforming from geographic to projected CRS. "
             "Z coordinates may need unit conversion."
         )
 
-    if source_info['is_projected'] and target_info['is_geographic']:
-        compatibility['warnings'].append(
+    if source_info["is_projected"] and target_info["is_geographic"]:
+        compatibility["warnings"].append(
             "Transforming from projected to geographic CRS. "
             "Z coordinates may need unit conversion."
         )
 
-    if source_info['is_compound'] or target_info['is_compound']:
-        compatibility['warnings'].append(
-            "One or both CRS are compound. "
-            "Z coordinate handling may be complex."
+    if source_info["is_compound"] or target_info["is_compound"]:
+        compatibility["warnings"].append(
+            "One or both CRS are compound. Z coordinate handling may be complex."
         )
 
     return compatibility

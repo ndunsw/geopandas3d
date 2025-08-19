@@ -69,16 +69,16 @@ class TestHNSWOptimization:
         coords2 = [(0.5, 0.5, 0.5), (1.5, 1.5, 1.5)]
 
         gdf1 = GeoDataFrame3D.from_points(coords1, crs="EPSG:4326")
-        gdf1['id'] = range(len(coords1))
+        gdf1["id"] = range(len(coords1))
 
         gdf2 = GeoDataFrame3D.from_points(coords2, crs="EPSG:4326")
-        gdf2['id'] = range(len(coords2))
+        gdf2["id"] = range(len(coords2))
 
         # Test spatial join
         joined = gdf1.sjoin_nearest3d(gdf2, k=2, method="cKDTree")
         assert len(joined) > 0
-        assert 'distance' in joined.columns
-        assert 'neighbor_rank' in joined.columns
+        assert "distance" in joined.columns
+        assert "neighbor_rank" in joined.columns
 
     def test_large_dataset_auto_selection(self):
         """Test automatic method selection for large datasets."""
@@ -101,7 +101,7 @@ class TestHNSWOptimization:
             assert len(indices[0]) == 5
 
             # Should have used HNSW for large dataset
-            assert hasattr(gdf3d, '_hnsw_index') or hasattr(gdf3d, '_sindex')
+            assert hasattr(gdf3d, "_hnsw_index") or hasattr(gdf3d, "_sindex")
 
         except ImportError:
             # If HNSW not available, should fall back to cKDTree

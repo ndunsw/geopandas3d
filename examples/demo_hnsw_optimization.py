@@ -31,10 +31,7 @@ def demo_hnsw_indexing():
     coords_3d = list(zip(x_coords, y_coords, z_coords))
 
     # Create GeoDataFrame3D
-    gdf3d = GeoDataFrame3D.from_points(
-        coords_3d,
-        crs="EPSG:4326"
-    )
+    gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
     print(f"Dataset size: {len(gdf3d):,} points")
     print()
@@ -53,7 +50,7 @@ def demo_hnsw_indexing():
         gdf3d.build_sindex(method="HNSW")
         hnsw_time = time.time() - start_time
         print(f"HNSW build time: {hnsw_time:.3f} seconds")
-        print(f"Speedup: {ckdtree_time/hnsw_time:.1f}x")
+        print(f"Speedup: {ckdtree_time / hnsw_time:.1f}x")
     except ImportError:
         print("HNSW indexing not available (install hnswlib: pip install hnswlib)")
         hnsw_time = None
@@ -76,10 +73,7 @@ def demo_knn_performance_comparison():
 
     coords_3d = list(zip(x_coords, y_coords, z_coords))
 
-    gdf3d = GeoDataFrame3D.from_points(
-        coords_3d,
-        crs="EPSG:4326"
-    )
+    gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
     # Generate query points
     n_queries = 1000
@@ -105,15 +99,15 @@ def demo_knn_performance_comparison():
     print("Testing HNSW performance...")
     try:
         start_time = time.time()
-        indices_hnsw, distances_hnsw = gdf3d.nearest3d(
-            query_points, k=5, method="HNSW"
-        )
+        indices_hnsw, distances_hnsw = gdf3d.nearest3d(query_points, k=5, method="HNSW")
         hnsw_query_time = time.time() - start_time
         print(f"HNSW query time: {hnsw_query_time:.3f} seconds")
-        print(f"Speedup: {ckdtree_query_time/hnsw_query_time:.1f}x")
+        print(f"Speedup: {ckdtree_query_time / hnsw_query_time:.1f}x")
 
         # Verify results are similar
-        print(f"Results match: {np.allclose(distances_ckdtree, distances_hnsw, atol=1e-6)}")
+        print(
+            f"Results match: {np.allclose(distances_ckdtree, distances_hnsw, atol=1e-6)}"
+        )
 
     except ImportError:
         print("HNSW not available for comparison")
@@ -136,12 +130,9 @@ def demo_optimized_spatial_join():
     z1 = np.random.uniform(0, 1000, n1)
     coords1 = list(zip(x1, y1, z1))
 
-    gdf1 = GeoDataFrame3D.from_points(
-        coords1,
-        crs="EPSG:4326"
-    )
-    gdf1['dataset'] = 'dataset1'
-    gdf1['id'] = range(n1)
+    gdf1 = GeoDataFrame3D.from_points(coords1, crs="EPSG:4326")
+    gdf1["dataset"] = "dataset1"
+    gdf1["id"] = range(n1)
 
     # Dataset 2: 5,000 points
     n2 = 5000
@@ -150,12 +141,9 @@ def demo_optimized_spatial_join():
     z2 = np.random.uniform(0, 1000, n2)
     coords2 = list(zip(x2, y2, z2))
 
-    gdf2 = GeoDataFrame3D.from_points(
-        coords2,
-        crs="EPSG:4326"
-    )
-    gdf2['dataset'] = 'dataset2'
-    gdf2['id'] = range(n2)
+    gdf2 = GeoDataFrame3D.from_points(coords2, crs="EPSG:4326")
+    gdf2["dataset"] = "dataset2"
+    gdf2["id"] = range(n2)
 
     print(f"Dataset 1: {len(gdf1):,} points")
     print(f"Dataset 2: {len(gdf2):,} points")
@@ -177,7 +165,7 @@ def demo_optimized_spatial_join():
         hnsw_join_time = time.time() - start_time
         print(f"HNSW join time: {hnsw_join_time:.3f} seconds")
         print(f"Joined result size: {len(joined_hnsw):,} rows")
-        print(f"Speedup: {ckdtree_join_time/hnsw_join_time:.1f}x")
+        print(f"Speedup: {ckdtree_join_time / hnsw_join_time:.1f}x")
 
         # Verify results are similar
         print(f"Results match: {len(joined_ckdtree) == len(joined_hnsw)}")
@@ -190,7 +178,9 @@ def demo_optimized_spatial_join():
     # Show sample results
     if len(joined_ckdtree) > 0:
         print("Sample joined results:")
-        print(joined_ckdtree.head(3)[['left_id', 'right_id', 'distance', 'neighbor_rank']])
+        print(
+            joined_ckdtree.head(3)[["left_id", "right_id", "distance", "neighbor_rank"]]
+        )
 
     print()
 
@@ -212,26 +202,21 @@ def demo_auto_method_selection():
         z_coords = np.random.uniform(0, 1000, size)
         coords_3d = list(zip(x_coords, y_coords, z_coords))
 
-        gdf3d = GeoDataFrame3D.from_points(
-            coords_3d,
-            crs="EPSG:4326"
-        )
+        gdf3d = GeoDataFrame3D.from_points(coords_3d, crs="EPSG:4326")
 
         # Test auto method selection
         print("  Testing auto method selection...")
         start_time = time.time()
-        indices, distances = gdf3d.nearest3d(
-            [(0, 0, 500)], k=5, method="auto"
-        )
+        indices, distances = gdf3d.nearest3d([(0, 0, 500)], k=5, method="auto")
         auto_time = time.time() - start_time
 
         print(f"  Auto method query time: {auto_time:.3f} seconds")
         print(f"  Found {len(indices[0])} nearest neighbors")
 
         # Show which method was selected
-        if hasattr(gdf3d, '_hnsw_index') and gdf3d._hnsw_index is not None:
+        if hasattr(gdf3d, "_hnsw_index") and gdf3d._hnsw_index is not None:
             print("  Method selected: HNSW")
-        elif hasattr(gdf3d, '_sindex') and gdf3d._sindex is not None:
+        elif hasattr(gdf3d, "_sindex") and gdf3d._sindex is not None:
             print("  Method selected: cKDTree")
         else:
             print("  Method selected: Unknown")

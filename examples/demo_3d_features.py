@@ -9,6 +9,7 @@ import pandas as pd
 # Try to import GeoPandas (required for geopandas3d)
 try:
     import geopandas as gpd
+
     GEOPANDAS_AVAILABLE = True
 except ImportError:
     print("Warning: GeoPandas not available. Install with: pip install geopandas")
@@ -24,10 +25,12 @@ try:
         # plot3d,
         polygon_area3d,
     )
+
     GEOPANDAS3D_AVAILABLE = True
 except ImportError:
     print("Warning: geopandas3d not available. Install with: pip install -e .")
     GEOPANDAS3D_AVAILABLE = False
+
 
 def demo_basic_3d_creation():
     """Demonstrate basic 3D GeoDataFrame creation."""
@@ -38,13 +41,15 @@ def demo_basic_3d_creation():
         return None
 
     # Create sample data with x, y, z coordinates
-    df = pd.DataFrame({
-        "id": [1, 2, 3, 4, 5],
-        "x": [0, 10, 20, 15, 25],
-        "y": [0, 10, 20, 15, 25],
-        "z": [0, 5, 15, 10, 20],
-        "value": [100, 200, 300, 250, 400]
-    })
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "x": [0, 10, 20, 15, 25],
+            "y": [0, 10, 20, 15, 25],
+            "z": [0, 5, 15, 10, 20],
+            "value": [100, 200, 300, 250, 400],
+        }
+    )
 
     print("Sample data with x, y, z coordinates:")
     print(df)
@@ -52,7 +57,9 @@ def demo_basic_3d_creation():
 
     # Create GeoDataFrame3D using the from_xyz constructor
     print("1. Creating GeoDataFrame3D from x, y, z columns:")
-    gdf3d = GeoDataFrame3D.from_xyz(df, "x", "y", "z", crs="EPSG:4979", height_col="altitude")
+    gdf3d = GeoDataFrame3D.from_xyz(
+        df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
+    )
     print(f"   Result: {gdf3d}")
     print()
 
@@ -73,6 +80,7 @@ def demo_basic_3d_creation():
 
     return gdf3d
 
+
 def demo_3d_points():
     """Demonstrate 3D point operations."""
     print("\n=== 3D Points Demo ===")
@@ -82,16 +90,20 @@ def demo_3d_points():
         return None
 
     # Create sample 3D point data
-    df = pd.DataFrame({
-        "id": [1, 2, 3, 4, 5],
-        "x": [0, 10, 20, 15, 25],
-        "y": [0, 10, 20, 15, 25],
-        "z": [0, 5, 15, 10, 20],
-        "value": [100, 200, 300, 250, 400]
-    })
+    df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "x": [0, 10, 20, 15, 25],
+            "y": [0, 10, 20, 15, 25],
+            "z": [0, 5, 15, 10, 20],
+            "value": [100, 200, 300, 250, 400],
+        }
+    )
 
     # Create GeoDataFrame3D using the from_xyz constructor
-    gdf = GeoDataFrame3D.from_xyz(df, "x", "y", "z", crs="EPSG:4979", height_col="altitude")
+    gdf = GeoDataFrame3D.from_xyz(
+        df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
+    )
     print(f"Created: {gdf}")
 
     # Basic operations
@@ -117,13 +129,16 @@ def demo_3d_points():
     for i, (neighbor_idx, distance) in enumerate(zip(idx[0], dist[0])):
         neighbor_point = gdf.iloc[neighbor_idx]["geometry"]
         neighbor_height = gdf.iloc[neighbor_idx][gdf.height_col]
-        print(f"  {i+1}. Point {neighbor_idx}: 2D {neighbor_point}, height {neighbor_height}, Distance: {distance:.2f}")
+        print(
+            f"  {i + 1}. Point {neighbor_idx}: 2D {neighbor_point}, height {neighbor_height}, Distance: {distance:.2f}"
+        )
 
     # Radius queries
     neighbors = gdf.query_ball3d([query_point], r=10.0)
     print(f"Points within radius 10: {neighbors[0]}")
 
     return gdf
+
 
 def demo_3d_polygons():
     """Demonstrate 3D polygon operations."""
@@ -140,7 +155,7 @@ def demo_3d_polygons():
         # Triangle polygon at z=10
         [(10, 10, 10), (15, 10, 10), (12.5, 15, 10)],
         # Complex polygon at z=20
-        [(20, 20, 20), (25, 20, 20), (25, 25, 20), (22.5, 27, 20), (20, 25, 20)]
+        [(20, 20, 20), (25, 20, 20), (25, 25, 20), (22.5, 27, 20), (20, 25, 20)],
     ]
 
     # Create GeoDataFrame3D from polygons
@@ -162,13 +177,13 @@ def demo_3d_polygons():
     # Individual geometry bounds
     bounds_list = gdf.get_geometry_bounds3d()
     for i, bounds in enumerate(bounds_list):
-        print(f"Polygon {i+1} bounds: {bounds}")
+        print(f"Polygon {i + 1} bounds: {bounds}")
 
     # Polygon properties
     for i, geom in enumerate(gdf.geometry):
         if geom is not None:
             # Extract vertices for area calculation
-            if hasattr(geom, 'exterior'):
+            if hasattr(geom, "exterior"):
                 vertices = list(geom.exterior.coords)
             else:
                 vertices = list(geom.coords)
@@ -179,7 +194,7 @@ def demo_3d_polygons():
 
             area = polygon_area3d(vertices_3d)
             centroid = centroid3d(vertices_3d)
-            print(f"Polygon {i+1}: Area = {area:.2f}, Centroid = {centroid}")
+            print(f"Polygon {i + 1}: Area = {area:.2f}, Centroid = {centroid}")
 
     # Point-in-polygon tests
     test_points = [(2.5, 2.5, 0), (12.5, 12.5, 10), (30, 30, 30)]
@@ -187,7 +202,7 @@ def demo_3d_polygons():
         for j, geom in enumerate(gdf.geometry):
             if geom is not None:
                 # Extract vertices and add height
-                if hasattr(geom, 'exterior'):
+                if hasattr(geom, "exterior"):
                     vertices = list(geom.exterior.coords)
                 else:
                     vertices = list(geom.coords)
@@ -196,9 +211,12 @@ def demo_3d_polygons():
                 vertices_3d = [(v[0], v[1], height) for v in vertices]
 
                 inside = is_point_in_polygon3d(point, vertices_3d)
-                print(f"Point {point} {'inside' if inside else 'outside'} polygon {j+1}")
+                print(
+                    f"Point {point} {'inside' if inside else 'outside'} polygon {j + 1}"
+                )
 
     return gdf
+
 
 def demo_spatial_joins():
     """Demonstrate spatial join operations."""
@@ -209,22 +227,25 @@ def demo_spatial_joins():
         return None
 
     # Create two datasets
-    left_df = pd.DataFrame({
-        "id": [1, 2, 3, 4],
-        "x": [2, 12, 22, 17],
-        "y": [2, 12, 22, 17],
-        "z": [2, 7, 17, 12]
-    })
+    left_df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4],
+            "x": [2, 12, 22, 17],
+            "y": [2, 12, 22, 17],
+            "z": [2, 7, 17, 12],
+        }
+    )
 
-    right_df = pd.DataFrame({
-        "oid": [100, 101, 102],
-        "x": [1, 30, 18],
-        "y": [1, 30, 18],
-        "z": [1, 30, 18]
-    })
+    right_df = pd.DataFrame(
+        {"oid": [100, 101, 102], "x": [1, 30, 18], "y": [1, 30, 18], "z": [1, 30, 18]}
+    )
 
-    left_gdf = GeoDataFrame3D.from_xyz(left_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude")
-    right_gdf = GeoDataFrame3D.from_xyz(right_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude")
+    left_gdf = GeoDataFrame3D.from_xyz(
+        left_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
+    )
+    right_gdf = GeoDataFrame3D.from_xyz(
+        right_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
+    )
 
     # Build spatial indexes
     left_gdf.build_sindex()
@@ -237,12 +258,15 @@ def demo_spatial_joins():
         print(nearest_join[["id_l", "oid_r", "distance3d"]].head())
 
     # Within distance join
-    within_join = left_gdf.sjoin_within_distance3d(right_gdf, max_distance=8.0, how="inner")
+    within_join = left_gdf.sjoin_within_distance3d(
+        right_gdf, max_distance=8.0, how="inner"
+    )
     print(f"Within distance join (r=8): {len(within_join)} rows")
     if len(within_join) > 0:
         print(within_join[["id_l", "oid_r", "distance3d"]].head())
 
     return left_gdf, right_gdf
+
 
 def demo_plotting():
     """Demonstrate 3D plotting capabilities."""
@@ -253,23 +277,29 @@ def demo_plotting():
         return None
 
     # Create sample data for plotting
-    points_df = pd.DataFrame({
-        "id": [1, 2, 3, 4, 5],
-        "x": [0, 10, 20, 15, 25],
-        "y": [0, 10, 20, 15, 25],
-        "z": [0, 5, 15, 10, 20],
-        "value": [100, 200, 300, 250, 400]
-    })
+    points_df = pd.DataFrame(
+        {
+            "id": [1, 2, 3, 4, 5],
+            "x": [0, 10, 20, 15, 25],
+            "y": [0, 10, 20, 15, 25],
+            "z": [0, 5, 15, 10, 20],
+            "value": [100, 200, 300, 250, 400],
+        }
+    )
 
-    points_gdf = GeoDataFrame3D.from_xyz(points_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude")
+    points_gdf = GeoDataFrame3D.from_xyz(
+        points_df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
+    )
 
     # Create polygon data
     polygons = [
         [(0, 0, 0), (5, 0, 0), (5, 5, 0), (0, 5, 0)],
-        [(10, 10, 10), (15, 10, 10), (12.5, 15, 10)]
+        [(10, 10, 10), (15, 10, 10), (12.5, 15, 10)],
     ]
 
-    polygons_gdf = GeoDataFrame3D.from_polygons(polygons, crs="EPSG:4979", height_col="altitude")
+    polygons_gdf = GeoDataFrame3D.from_polygons(
+        polygons, crs="EPSG:4979", height_col="altitude"
+    )
 
     print("Created sample data for plotting")
     print(f"Points: {points_gdf}")
@@ -284,6 +314,7 @@ def demo_plotting():
     print("- plot3d(gdf) for standalone plotting function")
 
     return points_gdf, polygons_gdf
+
 
 def demo_utility_functions():
     """Demonstrate utility functions."""
@@ -314,12 +345,15 @@ def demo_utility_functions():
     inside = is_point_in_polygon3d(test_point, polygon_vertices)
     print(f"Point {test_point} is {'inside' if inside else 'outside'} the polygon")
 
+
 def demo_realistic_workflow():
     """Demonstrate a realistic workflow extending existing GeoPandas data."""
     print("\n=== Realistic Workflow Demo ===")
 
     if not GEOPANDAS_AVAILABLE or not GEOPANDAS3D_AVAILABLE:
-        print("Skipping realistic workflow demo - GeoPandas or geopandas3d not available")
+        print(
+            "Skipping realistic workflow demo - GeoPandas or geopandas3d not available"
+        )
         return None
 
     try:
@@ -327,11 +361,13 @@ def demo_realistic_workflow():
 
         print("1. Starting with existing 2D GeoPandas data:")
         # Simulate loading existing 2D data
-        existing_df = pd.DataFrame({
-            "id": [1, 2, 3],
-            "name": ["Point A", "Point B", "Point C"],
-            "category": ["A", "B", "A"]
-        })
+        existing_df = pd.DataFrame(
+            {
+                "id": [1, 2, 3],
+                "name": ["Point A", "Point B", "Point C"],
+                "category": ["A", "B", "A"],
+            }
+        )
 
         # Create 2D geometries (as you might have from a file)
         geometries_2d = [Point(0, 0), Point(10, 10), Point(20, 20)]
@@ -357,8 +393,10 @@ def demo_realistic_workflow():
         # Create 3D version for 3D operations
         gdf3d = GeoDataFrame3D.from_xyz(
             gdf_2d[["id", "name", "category", "x", "y", "z"]],
-            "x", "y", "z",
-            crs="EPSG:4979"  # 3D CRS
+            "x",
+            "y",
+            "z",
+            crs="EPSG:4979",  # 3D CRS
         )
         print(f"   Result: {gdf3d}")
         print()
@@ -386,7 +424,9 @@ def demo_realistic_workflow():
             # For k=1, idx and dist are 1D arrays
             nearest_idx = idx[0]
             nearest_name = gdf3d.iloc[nearest_idx]["name"]
-            print(f"   - Nearest to {query_point}: {nearest_name} (distance: {dist[0]:.2f})")
+            print(
+                f"   - Nearest to {query_point}: {nearest_name} (distance: {dist[0]:.2f})"
+            )
         else:
             print(f"   - No nearest neighbor found for {query_point}")
         print()
@@ -404,6 +444,7 @@ def demo_realistic_workflow():
         print(f"Error: {e}")
         print("Make sure shapely is installed: pip install shapely")
         return None
+
 
 def main():
     """Run all demos."""
@@ -443,7 +484,9 @@ def main():
     except Exception as e:
         print(f"Demo failed with error: {e}")
         import traceback
+
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     main()
