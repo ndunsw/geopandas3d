@@ -107,7 +107,10 @@ class TestGeoDataFrame3D:
         gdf3d.build_sindex(method="cKDTree")
 
         assert gdf3d._sindex is not None
-        assert gdf3d._sindex.ready
+
+        from scipy.spatial import cKDTree
+
+        assert isinstance(gdf3d._sindex, cKDTree)
 
     def test_nearest_neighbor(self):
         """Test nearest neighbor queries."""

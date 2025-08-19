@@ -328,7 +328,6 @@ class GeoDataFrame3D(GeoDataFrame):
         # Construct as GeoDataFrame3D
         return cls(new_gdf, geometry=geometry_column, crs=gdf.crs, **kwargs)
 
-    # ----- 3D geometry operations -----
     def get_3d_coordinates(self) -> np.ndarray:
         """Get 3D coordinates as numpy array for spatial operations.
 
@@ -408,7 +407,6 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return bounds_list
 
-    # ----- 3D spatial indexing -----
     def build_sindex(self, method: str = "cKDTree", **kwargs):
         """Build 3D spatial index for efficient spatial queries.
 
@@ -508,30 +506,21 @@ class GeoDataFrame3D(GeoDataFrame):
             self.build_sindex()
         return self._sindex
 
-    # ----- 3D spatial queries -----
     def nearest3d(self, query_points, k=1, method="auto", **kwargs):
-        """Find k nearest neighbors in 3D space.
+        """Find k nearest neighbors in 3D space."""
 
-        Args:
-            query_points: Query points as (n, 3) array or list of Point3D
-            k: Number of nearest neighbors to find
-            method: Search method ("auto", "cKDTree", or "HNSW")
-            **kwargs: Additional arguments for the search method
-
-        Returns:
-            tuple: (indices, distances) arrays
-        """
-        if method == "auto" and len(self) > 100000:  # Prefer HNSW for huge datasets
-            method = "HNSW"
-        else:
-            method = "cKDTree"
+        if method == "auto":
+            if len(self) > 100000:  # Prefer HNSW for huge datasets
+                method = "HNSW"
+            else:
+                method = "cKDTree"
+        elif method not in ("cKDTree", "HNSW"):
+            raise ValueError(f"Unknown search method: {method}")
 
         if method == "cKDTree":
             return self._nearest3d_ckdtree(query_points, k, **kwargs)
         elif method == "HNSW":
             return self._nearest3d_hnsw(query_points, k, **kwargs)
-        else:
-            raise ValueError(f"Unknown search method: {method}")
 
     def _nearest3d_ckdtree(self, query_points, k=1, **kwargs):
         """Find nearest neighbors using cKDTree."""
@@ -666,7 +655,6 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return neighbors
 
-    # ----- 3D spatial joins -----
     def sjoin_within_distance3d(
         self,
         other: GeoDataFrame3D,
@@ -740,7 +728,6 @@ class GeoDataFrame3D(GeoDataFrame):
 
         return pd.DataFrame(rows) if rows else pd.DataFrame()
 
-    # ----- 3D plotting methods -----
     def plot3d(self, column=None, ax=None, **kwargs):
         """Plot the 3D data using matplotlib."""
         from .plotting import plot3d
@@ -1018,7 +1005,6 @@ class GeoDataFrame3D(GeoDataFrame):
             crs=self.crs,
         )
 
-    # ----- GeoPandas method delegation -----
     def __getattr__(self, name):
         """Delegate unknown attributes to the parent GeoDataFrame."""
         if hasattr(super(), name):
