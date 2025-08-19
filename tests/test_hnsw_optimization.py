@@ -77,7 +77,7 @@ class TestHNSWOptimization:
         # Test spatial join
         joined = gdf1.sjoin_nearest3d(gdf2, k=2, method="cKDTree")
         assert len(joined) > 0
-        assert "distance" in joined.columns
+        assert "distance3d" in joined.columns
         assert "neighbor_rank" in joined.columns
 
     def test_large_dataset_auto_selection(self):

@@ -104,7 +104,7 @@ class TestGeoDataFrame3D:
         gdf3d = GeoDataFrame3D.from_xyz(
             df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
         )
-        gdf3d.build_sindex()
+        gdf3d.build_sindex(method="cKDTree")
 
         assert gdf3d._sindex is not None
         assert gdf3d._sindex.ready
@@ -134,7 +134,7 @@ class TestGeoDataFrame3D:
         gdf3d = GeoDataFrame3D.from_xyz(
             df, "x", "y", "z", crs="EPSG:4979", height_col="altitude"
         )
-        gdf3d.build_sindex()
+        gdf3d.build_sindex(method="cKDTree")
 
         query_point = (0.5, 0.5, 0.5)
         neighbors = gdf3d.query_ball3d([query_point], r=1.0)
