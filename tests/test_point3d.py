@@ -2,9 +2,10 @@
 Tests for the Point3D class.
 """
 
+import dataclasses
+
 import numpy as np
 import pytest
-import dataclasses
 from shapely.geometry import Point
 
 # Skip if geopandas3d is not available

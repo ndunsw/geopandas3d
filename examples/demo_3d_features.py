@@ -21,7 +21,7 @@ try:
         centroid3d,
         distance3d,
         is_point_in_polygon3d,
-        plot3d,
+        # plot3d,
         polygon_area3d,
     )
     GEOPANDAS3D_AVAILABLE = True
@@ -183,7 +183,7 @@ def demo_3d_polygons():
 
     # Point-in-polygon tests
     test_points = [(2.5, 2.5, 0), (12.5, 12.5, 10), (30, 30, 30)]
-    for i, point in enumerate(test_points):
+    for _i, point in enumerate(test_points):
         for j, geom in enumerate(gdf.geometry):
             if geom is not None:
                 # Extract vertices and add height

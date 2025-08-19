@@ -461,16 +461,10 @@ class GeoDataFrame3D(GeoDataFrame):
         Returns:
             tuple: (indices, distances) arrays
         """
-        if method == "auto":
-            if len(self) > 100000:  # Prefer HNSW for huge datasets
-                try:
-                    import hnswlib  # check availability
-                    method = "HNSW"
-                except ImportError as err:
-                    method = "cKDTree"
-                    warnings.warn("hnswlib is required for HNSW indexing. Install with: pip install hnswlib", stacklevel=2)
-            else:
-                method = "cKDTree"
+        if method == "auto" and len(self) > 100000:   # Prefer HNSW for huge datasets
+            method = "HNSW"
+        else:
+            method = "cKDTree"
 
         if method == "cKDTree":
             return self._nearest3d_ckdtree(query_points, k, **kwargs)
