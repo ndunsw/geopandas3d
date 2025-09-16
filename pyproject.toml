@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geopandas3d"
-version = "0.3.1-dev"
+version = "0.3.2-dev"
 description = "3D extensions to GeoPandas for altitude-aware spatial operations"
 readme = "README.md"
 requires-python = ">=3.9"

@@ -25,11 +25,8 @@ GeoPandas3D extends GeoPandas with altitude awareness. It supports 3D distance c
 ## Installation
 
 ```bash
-# Basic installation
-pip install geopandas3d
-
-# Full feature set with HNSW support
-pip install geopandas3d[full]
+# Basic installation & Full feature set with HNSW support
+# To be added to Pypim, for now refer to the development installation
 
 # Development install
 git clone https://github.com/yourname/geopandas3d.git
@@ -48,7 +45,7 @@ pip install -e .
 ## Dependencies
 
 - Required: geopandas, pandas, numpy, scipy, shapely  
-- Optional: pyproj  
+- Optional: pyproj, matplotlib, hnsw
 
 ---
 
