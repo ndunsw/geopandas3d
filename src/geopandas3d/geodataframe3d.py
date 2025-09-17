@@ -386,7 +386,9 @@ class GeoDataFrame3D(GeoDataFrame):
             pandas.Series of (x, y, z) tuples representing centroids.
         """
         coords = self.get_3d_coordinates()
-        return pd.Series([tuple(row) for row in coords], index=self.index, name="centroid3d")
+        return pd.Series(
+            [tuple(row) for row in coords], index=self.index, name="centroid3d"
+        )
 
     def is_point_in_polygon3d(
         self,
@@ -407,14 +409,20 @@ class GeoDataFrame3D(GeoDataFrame):
             List of lists of indices (for each query point)
         """
         geom_types = self.geometry.type.unique()
-        if not any(gtype.lower() in ("polygon", "multipolygon") for gtype in geom_types):
-            raise TypeError("is_point_in_polygon3d requires polygon or multipolygon geometries")
+        if not any(
+            gtype.lower() in ("polygon", "multipolygon") for gtype in geom_types
+        ):
+            raise TypeError(
+                "is_point_in_polygon3d requires polygon or multipolygon geometries"
+            )
 
         results = []
         for x, y, z in points:
             pt = Point(x, y)
             inside_indices = []
-            for i, (geom, height) in enumerate(zip(self.geometry, self[self.height_col])):
+            for i, (geom, height) in enumerate(
+                zip(self.geometry, self[self.height_col])
+            ):
                 if geom.type.lower() not in ("polygon", "multipolygon"):
                     continue
                 if geom.contains(pt) and abs(z - height) <= z_tolerance:
