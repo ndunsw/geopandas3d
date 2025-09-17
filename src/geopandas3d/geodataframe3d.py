@@ -7,10 +7,10 @@ from __future__ import annotations
 import warnings
 from collections.abc import Iterable
 from typing import Literal, Optional
-from shapely.geometry import Point
 
 import numpy as np
 import pandas as pd
+from shapely.geometry import Point
 
 # Import GeoPandas classes to extend
 try:
