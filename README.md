@@ -73,6 +73,27 @@ gdf3d = GeoDataFrame3D.from_xyz(
 print(gdf3d)
 ```
 
+### Creating a more complex GeoDataFrame3D
+
+```python
+from shapely.geometry import Polygon
+from geopandas3d import GeoDataFrame3D
+
+polygons = [
+    Polygon([(0, 0), (0, 10), (10, 10), (10, 0)]),       # Square near origin
+    Polygon([(15, 15), (15, 25), (25, 25), (25, 15)])    # Another square shifted up/right
+]
+
+# Heights associated with each polygon (could represent mean altitude)
+heights = [5.0, 12.5]
+
+gdf3d_poly = GeoDataFrame3D(
+    data={"geometry": polygons, "height": heights},
+    height_col="height",
+    crs="EPSG:4326"
+)
+```
+
 ### Performing 3D Operations
 
 ```python
@@ -86,7 +107,7 @@ centroids = gdf3d.centroid3d()
 bounds3d = gdf3d.bounds3d()
 
 # 3D point-in-polygon test
-inside = gdf3d.is_point_in_polygon3d([(10, 10, 5)])
+inside = gdf3d_poly.is_point_in_polygon3d([(10, 10, 5)])
 ```
 
 ### Performance Optimization with HNSW

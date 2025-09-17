@@ -7,6 +7,7 @@ from __future__ import annotations
 import warnings
 from collections.abc import Iterable
 from typing import Literal, Optional
+from shapely.geometry import Point
 
 import numpy as np
 import pandas as pd
@@ -355,6 +356,72 @@ class GeoDataFrame3D(GeoDataFrame):
                 coords.append([np.nan, np.nan, np.nan])
 
         return np.array(coords)
+
+    def distance3d(self, query_points: list[tuple[float, float, float]]) -> np.ndarray:
+        """
+        Compute 3D distances from geometries in this GeoDataFrame3D to given query points.
+
+        Args:
+            query_points: List of (x, y, z) query points
+
+        Returns:
+            (n, m) array of distances where n = len(self) and m = len(query_points)
+        """
+        coords = self.get_3d_coordinates()
+        if len(coords) == 0 or len(query_points) == 0:
+            return np.empty((len(coords), len(query_points)))
+
+        query_array = np.array(query_points, dtype=float).reshape(-1, 3)
+
+        # Broadcast and compute Euclidean distance
+        diff = coords[:, None, :] - query_array[None, :, :]
+        dists = np.linalg.norm(diff, axis=2)
+        return dists
+
+    def centroid3d(self) -> pd.Series:
+        """
+        Compute 3D centroids of geometries.
+
+        Returns:
+            pandas.Series of (x, y, z) tuples representing centroids.
+        """
+        coords = self.get_3d_coordinates()
+        return pd.Series([tuple(row) for row in coords], index=self.index, name="centroid3d")
+
+    def is_point_in_polygon3d(
+        self,
+        points: list[tuple[float, float, float]],
+        z_tolerance: float = 1e-6,
+    ) -> list[list[int]]:
+        """
+        Test whether 3D points are inside polygons (with optional height tolerance).
+
+        For each query point, return a list of indices of polygons it is inside.
+        Uses 2D polygon containment + z check.
+
+        Args:
+            points: List of (x, y, z) points
+            z_tolerance: Max vertical distance to consider "inside" polygon's height
+
+        Returns:
+            List of lists of indices (for each query point)
+        """
+        geom_types = self.geometry.type.unique()
+        if not any(gtype.lower() in ("polygon", "multipolygon") for gtype in geom_types):
+            raise TypeError("is_point_in_polygon3d requires polygon or multipolygon geometries")
+
+        results = []
+        for x, y, z in points:
+            pt = Point(x, y)
+            inside_indices = []
+            for i, (geom, height) in enumerate(zip(self.geometry, self[self.height_col])):
+                if geom.type.lower() not in ("polygon", "multipolygon"):
+                    continue
+                if geom.contains(pt) and abs(z - height) <= z_tolerance:
+                    inside_indices.append(i)
+            results.append(inside_indices)
+
+        return results
 
     def bounds3d(self) -> tuple[float, float, float, float, float, float]:
         """Get 3D bounding box (xmin, ymin, zmin, xmax, ymax, zmax)."""
